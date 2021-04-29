@@ -48,13 +48,13 @@ func GeneratePost(tmpl *template.Template, mdPath, outPutPath string)error{
 	if _, err := os.Stat(outPutPath); os.IsNotExist(err) {
 		//make the dir first
 		parentDir := filepath.Dir(outPutPath)
-		err = os.MkdirAll(parentDir, os.ModeDir)
+		err = os.MkdirAll(parentDir, 0766)
 		if err != nil{
 			log.Fatal(err.Error())
 		}
 	}
 
-	outFile, err := os.OpenFile(outPutPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0766)
+	outFile, err := os.OpenFile(outPutPath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0766)
 	if err != nil{
 		return err
 	}
@@ -120,7 +120,7 @@ func (a ByDate) Less(i, j int) bool {
 
 
 func GenerateList(tmpl *template.Template, contentList RenderList, outputFile string)error{
-	outFile, err := os.OpenFile(outputFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0766)
+	outFile, err := os.OpenFile(outputFile, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0766)
 	if err != nil{
 		return err
 	}

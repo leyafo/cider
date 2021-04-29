@@ -47,7 +47,7 @@ func ReadContentInfo(r RenderList, path string)(error){
 
 func StoreContentInfo(r RenderList, path string)error{
 	log.Println("Save all post update time")
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0755)
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0755)
 	if err != nil{
 		panic("open file error: "+err.Error())
 		return err
