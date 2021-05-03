@@ -58,13 +58,13 @@ little differences. Many common and simple word are hard to be used
 correctly.  For example, *I need get some help.* is not correct, we should say
 *"need to do something"* or *"need doing something"*.
 
-Writing in the second language, the hardest part of writing is not the limited of
+The hardest part of second language writing, it's not the limited of
 vocabulary, it's the suitable sentences to express your ideas, it's the right
 grammar syntax, it's the simple and clear words that you've chosen, not the
 rare and abstract words translated from your mother language. The common and
 simple words are more important than rare and complicated words. Simple is
 better than everything, it's easy to make, easy to find error, easy to be
-understand by your readers. The limited of vocabulary is not worse, it's
+understood by readers. The limited of vocabulary is not worse, it's
 good, it makes your sentences to keep a simple style. 
 
 Looking up in the dictionary while reading a book will slow down your

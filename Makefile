@@ -1,5 +1,3 @@
-
-
 .PHONY: run
 run:
 	@go run *.go
@@ -10,8 +8,15 @@ build:
 	@go build -o cider *.go
 
 
-deploy: build
-	@cp -f cider /mnt/c/Users/Tank/code/blog_data/
-
 clean:
 	@rm -f cider .meta
+	@rm cider_*
+
+platforms := $(windows linux darwin)
+release:
+	@for v in windows linux darwin ; do \
+		GOOS=$$v GOARCH=amd64 go build -o cider_$${v}_amd64 *.go ; \
+		zip -ur cider_$${v}_amd64.zip cider_$${v}_amd64 templates ; \
+		GOOS=$$v GOARCH=386 go build -o cider_$${v}_386 *.go ; \
+		zip -ur cider_$${v}_386.zip cider_$${v}_386 templates ; \
+    done
