@@ -13,11 +13,7 @@
         {{ .Content}}
     </article>
 
-    <div class="comments">
-        <hr class="hr-middle-text" data-content="COMMENTS">
-        <script src="https://utteranc.es/client.js" repo="leyafo/leyafo.github.io" issue-term="title" label="Commnets" theme="github-light" crossorigin="anonymous" async >
-        </script>
-    </div>
+    {{template "_comments"}}
 <script>
     document.querySelectorAll("pre").forEach(function (i) {
         i.removeAttribute("style")

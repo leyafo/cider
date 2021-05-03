@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -124,9 +125,15 @@ func renderPost(needView bool){
 	StoreContentInfo(renderList, metaPath)
 	if needView{
 		log.Println("Starting HTTP file server at http://localhost:8080/")
-		s := newViewingServer(contentFolder, "public")
+		s := newViewingServer(contentFolder, outputFolder)
 		log.Fatal(http.ListenAndServe(":8080", http.HandlerFunc(s.viewingServer)))
 	}
+}
+
+func printHelp(){
+	fmt.Println("./cider\n", "render all MD files(in content folder) to public" )
+	fmt.Println("./cider s \n", "render all MD files and then start a HTTP server to exhibit your github pages")
+	fmt.Println("./cider d \n", "start a HTTP server and render contents in draft folder." )
 }
 
 func main(){
@@ -140,6 +147,8 @@ func main(){
 			log.Println("Starting HTTP file server at http://localhost:8080/")
 			s := newDraftServer(draftFolder)
 			log.Fatal(http.ListenAndServe(":8080", http.HandlerFunc(s.draftServer)))
+		case "h":
+			printHelp()
 		default:
 			break
 		}

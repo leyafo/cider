@@ -26,16 +26,11 @@ func (c ContentInfo)GetMDPath(rootPath string)string{
 	return filepath.Join(rootPath, c.IndexKey+c.Ext)
 }
 
-func (c ContentInfo)GetImagePath(rootPath string)string{
-	return filepath.Join(rootPath, c.IndexKey+c.Ext)
-}
-
 func (c ContentInfo)GetMDOutPath(rootPath string)string {
 	return  filepath.Join(rootPath, c.IndexKey, "index.html")
 }
 
 type RenderList map[string]*ContentInfo
-
 func ReadContentInfo(r RenderList, path string)(error){
 	file, err := os.Open(path)
 	if err != nil{
