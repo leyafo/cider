@@ -170,6 +170,12 @@
                 flex: 1;
                 text-align: right;
             }
+            article{
+                letter-spacing: -0.003em;
+                line-height: 28px;
+                font-size: 18px;
+                word-wrap: break-word;
+            }
         }
         /* index style end */
 </style>
