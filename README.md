@@ -1,9 +1,9 @@
 The `cider` is a simple tool of building GitHub pages. It's fast and easy to use. See example: https://www.leyafo.com
 
 ## Install
-Compiling from source code, or else you can download the zip file from release.
+Compiling from source code:  
 ```bash
-go build -o cider *.go  
+go build -o cider main.go
 ```
 
 ## Generate your site through Github Action(Recommending)
@@ -13,9 +13,9 @@ go build -o cider *.go
 ssh-keygen -t rsa -b 4096 -C $(git config user.email) -f gh-pages -N ""
 ```
 It will create two files: `gh-pages` and `gh-pages.pub`.   
-Copy all contens of the gh-pages.pub into `Github/Setting/SSH and GPG keys/Add SSH Key.`  
+Copy all contens of the `gh-pages.pub` into `Github/Setting/SSH and GPG keys/Add SSH Key.`  
 ![ssh_public_key](rs/images/ssh_pub.png)
-Copy all contens of the gh-pages into `this project(your folkd)/Settings/Secrets/New repository secret`. The name must be **ACTIONS_DEPLOY_KEY**.
+Copy all contens of the `gh-pages` into `this project(your folkd)/Settings/Secrets/New repository secret`. The name must be **ACTIONS_DEPLOY_KEY**.
 ![ssh_private_key](rs/images/ssh_private.jpg).
 3. Create a repository named `your_name.github.io`
 4. Copy the repository SSH url into `this project(your folkd)/Settings/Secrets/New repository secret`. The name must be **DEPLOY_REPOSITORY**.
