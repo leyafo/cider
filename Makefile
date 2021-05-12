@@ -1,11 +1,11 @@
 .PHONY: run
 run:
-	@go run *.go
+	@go run main.go
 
 
 .PHONY: build
 build:
-	@go build -o cider *.go
+	@go build -o cider main.go
 
 
 clean:

@@ -1,7 +1,7 @@
-package main
+package render
 
 import (
-	"encoding/json"
+	"encoding/gob"
 	"log"
 	"os"
 	"path/filepath"
@@ -31,23 +31,25 @@ func (c ContentInfo)GetMDOutPath(rootPath string)string {
 }
 
 type RenderList map[string]*ContentInfo
-func ReadContentInfo(r RenderList, path string)(error){
+func readContentInfo(r RenderList, path string)(error){
+	log.Println("Get all post update time from:", path)
 	file, err := os.Open(path)
 	if err != nil{
 		return  err
 	}
 	defer file.Close()
-	return json.NewDecoder(file).Decode(&r)
+	return gob.NewDecoder(file).Decode(&r)
 }
 
-func StoreContentInfo(r RenderList, path string)error{
-	log.Println("Save all post update time")
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0755)
+func storeContentInfo(r RenderList, path string)error{
+	log.Println("Save all post update time into:", path)
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0744)
 	if err != nil{
 		panic("open file error: "+err.Error())
 		return err
 	}
-	err = json.NewEncoder(file).Encode(r)
+	defer file.Close()
+	err = gob.NewEncoder(file).Encode(r)
 	if err != nil{
 		panic("open file error: "+err.Error())
 		return err
@@ -146,3 +148,4 @@ func (c RenderList)GetRemovedContentInfo(contentDir string)[]*ContentInfo{
 	}
 	return result
 }
+

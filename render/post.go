@@ -1,4 +1,4 @@
-package main
+package render
 
 import (
 	"bufio"
@@ -44,17 +44,17 @@ type Post struct{
 	Content string
 }
 
-func GeneratePost(tmpl *template.Template, mdPath, outPutPath string)error{
-	if _, err := os.Stat(outPutPath); os.IsNotExist(err) {
+func GeneratePost(tmpl *template.Template, mdPath, outputPath string) error {
+	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
 		//make the dir first
-		parentDir := filepath.Dir(outPutPath)
+		parentDir := filepath.Dir(outputPath)
 		err = os.MkdirAll(parentDir, 0766)
 		if err != nil{
 			log.Fatal(err.Error())
 		}
 	}
 
-	outFile, err := os.OpenFile(outPutPath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0766)
+	outFile, err := os.OpenFile(outputPath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0766)
 	if err != nil{
 		return err
 	}
@@ -141,4 +141,34 @@ func GenerateListOut(tmpl *template.Template, contentList RenderList, output io.
 	}
 	sort.Sort(&l)
 	return tmpl.Execute(output, &l)
+}
+
+func GenerateListWithPath(tmpl *template.Template, contentList RenderList, path string, output io.Writer)error{
+	var l ByDate
+	for _, content := range contentList{
+		if content.IsContent() && strings.Index(content.IndexKey, path) == 0{
+			l = append(l, PostTitleList{
+				Title:     content.Title,
+				CreateDate: content.CreateDate,
+				CreateDateStr: content.CreateDate.Format("2006-01-02"),
+				Link:  content.IndexKey,
+			})
+		}
+	}
+	sort.Sort(&l)
+	return tmpl.Execute(output, &l)
+}
+
+func GetTemplate(tmplPath, tmplFile string)*template.Template{
+	templ, err:= template.ParseFiles(filepath.Join(tmplPath, tmplFile))
+	if err != nil{
+		log.Fatal(err)
+		return nil
+	}
+	templ, err = templ.ParseGlob(filepath.Join(tmplPath, "partials", "*"))
+	if err != nil{
+		log.Fatal(err)
+		return nil
+	}
+	return templ
 }

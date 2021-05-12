@@ -6,37 +6,28 @@ Compiling from source code, or else you can download the zip file from release.
 go build -o cider *.go  
 ```
 
-## Generate your site
-Add your `md` file into content folder, to apply the article with create time, your file name must start with date. For example:
-```bash
-touch content/2021-05-20-your-file-name.md
+## Generate your site through Github Action(Recommending)
+1. Folk this project.
+2. Gernerate a SSH key for Github Action commit:
 ```
+ssh-keygen -t rsa -b 4096 -C $(git config user.email) -f gh-pages -N ""
+```
+It will create two files: `gh-pages` and `gh-pages.pub`.   
+Copy all contens of the gh-pages.pub into `Github/Setting/SSH and GPG keys/Add SSH Key.`  
+![ssh_public_key](rs/images/ssh_pub.png)
+Copy all contens of the gh-pages into `this project(your folkd)/Settings/Secrets/New repository secret`. The name must be **ACTIONS_DEPLOY_KEY**.
+![ssh_private_key](rs/images/ssh_private.jpg).
+3. Create a repository named `your_name.github.io`
+4. Copy the repository SSH url into `this project(your folkd)/Settings/Secrets/New repository secret`. The name must be **DEPLOY_REPOSITORY**.
+![ssh_repository_url](rs/images/repository_url.jpg)
 
-Generating the entire site:
-```bash
-./cider 
-```
-All html files are rendered in `public` folder.
+All done, happy writing.   
 
-For exhibiting your site on local HTTP Server.  
-```bash
-./cider s
-```
+You can empty all md files in `content` and all images files in `rs/images`, those are my demo content. When you want to reference an image in your article, you should put the file in `rs/images`. It will be synced to `your_name.github.io` in which all md files are generated.
+Notice: The CNAME file uploading and domain binding and other settings must be configured with yourself.  
 
-If you don't want to publish your article and just want to present it as a draft, move the `md` file into `draft` folder. Running:
-```bash
-./cider d
-```
-It will show all drafts(in draft folder) on a local HTTP server. 
-
-### Publish your site
-Create a repository `your_name.github.io` in GitHub. Initialize the public folder with `your_name.github.io` repository.
-```
-git init
-git commit -m "first commit"
-git remote add origin git@github.com:your_name/your_name.github.io
-git push -u origin master
-```
+### Showing your site on local
+`./cider s`
 
 ### Classify your articles
 If you want to classify your articles into different groups, you should create a subfolder into content, and then add the folder link into `templates/partials/_nav.html.tpl`. For example, if you have written an article about English learning, and want to create a English Learning group in your website.

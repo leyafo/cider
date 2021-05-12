@@ -1,7 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"github.com/leyafo/cider/render"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -11,14 +14,17 @@ import (
 )
 
 var(
+	outputFolder  = flag.String("o", "public", "")
 	contentFolder = "content"
-	outputFolder  = "public"
 	templatePath  = "templates"
 	metaPath      = ".meta"
 	draftFolder   = "draft"
+	indexTemplate = "index.html.tpl"
+	postTemplate  = "post.html.tpl"
+	addr          = ":8080"
 )
 
-func Path(subPath ...string)string{
+func cwdPath(subPath ...string)string{
 	// using the function
 	workDir, err := os.Getwd()
 	if err != nil {
@@ -30,108 +36,9 @@ func Path(subPath ...string)string{
 	return workDir
 }
 
-func GetTemplate(mainTempFile string)*template.Template{
-	templ, err:= template.ParseFiles(Path(templatePath, mainTempFile))
-	if err != nil{
-		log.Fatal(err)
-		return nil
-	}
-	templ, err = templ.ParseGlob(Path(templatePath, "partials", "*"))
-	if err != nil{
-		log.Fatal(err)
-		return nil
-	}
-	return templ
-}
-
-func RenderPosts(list RenderList, isNeedRenderAll bool){
-	postTemplate := GetTemplate("post.html.tpl")
-	for key, info := range list{
-		if info.IsContent() && (isNeedRenderAll || info.NeedRender){
-			log.Printf("Rendering %s \n",key)
-			err := GeneratePost(postTemplate,
-				info.GetMDPath(Path(contentFolder)),
-				info.GetMDOutPath(Path(outputFolder)),
-			)
-			if err != nil{
-				log.Fatal(err.Error())
-				break
-			}
-			list[key].NeedRender = false
-		}
-	}
-}
-
-func renderIndexPages(list RenderList){
-	sepratedList := make(map[string]RenderList)
-	for k, v := range list{
-		if !v.IsContent(){
-			continue
-		}
-		paths := strings.Split(k, "/")
-		var indexKey string
-		if len(paths) == 3{
-			indexKey = paths[1]
-		}else{
-			indexKey = "/"
-		}
-		if len(paths) > 3{
-			panic("unsupported sub dictionary")
-		}
-		if _, ok := sepratedList[indexKey]; !ok{
-			sepratedList[indexKey] = make(RenderList)
-		}
-		sepratedList[indexKey][k] = v
-	}
-	for k, v := range sepratedList {
-		indexTemplate := GetTemplate("index.html.tpl")
-		err := GenerateList(indexTemplate, v, Path(outputFolder, k, "index.html"))
-		if err != nil{
-			log.Fatal(err)
-		}
-	}
-}
-
-
-func renderPost(needView bool){
-	renderList := make(RenderList)
-	err := ReadContentInfo(renderList, metaPath)
-	if err != nil{
-		renderList.UpdateRenderList(contentFolder)
-	}
-	renderList.UpdateRenderList(Path(contentFolder))
-
-	//check the output path does need to remove
-	removedPosts := renderList.GetRemovedContentInfo(Path(contentFolder))
-	for _, p := range(removedPosts){
-		removePath := Path(outputFolder, p.IndexKey)
-		log.Println("remove path:", removePath)
-		if err = os.RemoveAll(removePath); err != nil{
-			log.Println(err)
-		}
-	}
-
-	doesNeedRenderAll := renderList.GetTemplateModifyTimes(Path(templatePath))
-	if doesNeedRenderAll {
-		log.Println("Render all files")
-	}
-	RenderPosts(renderList, doesNeedRenderAll)
-	log.Println("All md files has been rendered.")
-
-	//generate homepage list, which sort by created time
-	log.Println("Render index")
-	renderIndexPages(renderList)
-
-	StoreContentInfo(renderList, metaPath)
-	if needView{
-		log.Println("Starting HTTP file server at http://localhost:8080/")
-		s := newViewingServer(contentFolder, outputFolder)
-		log.Fatal(http.ListenAndServe(":8080", http.HandlerFunc(s.viewingServer)))
-	}
-}
 
 func printHelp(){
-	fmt.Println("./cider\n", "render all MD files(in content folder) to public" )
+	fmt.Println("./cider -o path\n", "render all MD files(in content folder) to path, default is ./public" )
 	fmt.Println("./cider s \n", "render all MD files and then start a HTTP server to exhibit your github pages")
 	fmt.Println("./cider d \n", "start a HTTP server and render contents in draft folder." )
 }
@@ -140,20 +47,66 @@ func main(){
 	log.SetFlags(log.Lshortfile)
 
 	if len(os.Args) == 2{
-		switch(os.Args[1]){
+		s := viewingServer{}
+		s.PostList = make(render.RenderList)
+		s.PostTemplate = render.GetTemplate(cwdPath(templatePath),postTemplate)
+		s.IndexTemplate = render.GetTemplate(cwdPath(templatePath),indexTemplate)
+		switch os.Args[1] {
 		case "s":
-			renderPost(true)
-		case "d":
+			s.ContentDir=cwdPath(contentFolder)
+			s.PostList.UpdateRenderList(s.ContentDir)
 			log.Println("Starting HTTP file server at http://localhost:8080/")
-			s := newDraftServer(draftFolder)
-			log.Fatal(http.ListenAndServe(":8080", http.HandlerFunc(s.draftServer)))
+			log.Fatal(http.ListenAndServe(addr, http.HandlerFunc(s.viewingServer)))
+			return
+		case "d":
+			s.ContentDir=cwdPath(draftFolder)
+			s.PostList.UpdateRenderList(s.ContentDir)
+			log.Println("Starting HTTP file server at http://localhost:8080/")
+			log.Fatal(http.ListenAndServe(addr, http.HandlerFunc(s.viewingServer)))
+			return
 		case "h":
 			printHelp()
+			return
 		default:
 			break
 		}
-	}else{
-		renderPost(false)
 	}
+	flag.Parse()
+	outputPath, _ := filepath.Abs(*outputFolder)
+	render.Render(cwdPath(templatePath), cwdPath(contentFolder), filepath.Join(outputPath, metaPath), outputPath)
 }
 
+type viewingServer struct {
+	ContentDir string
+	PostList      render.RenderList
+	PostTemplate  *template.Template;
+	IndexTemplate *template.Template
+}
+
+func (s *viewingServer) viewingServer(w http.ResponseWriter, r *http.Request)  {
+	var err error
+	p := strings.TrimSpace(r.URL.Path)
+	if p[len(p)-1] == '/'{
+		err = render.GenerateListWithPath(s.IndexTemplate, s.PostList, p, w)
+	}else if strings.Index(p, "/images") == 0{
+		f, err := os.Open(cwdPath(p))
+		if err != nil{
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		io.Copy(w, f)
+	}else{
+		if p, ok := s.PostList[p]; ok{
+			err = render.GeneratePostOut(s.PostTemplate, p.GetMDPath(s.ContentDir), w)
+		}else{
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+	}
+	if err != nil{
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}else{
+		w.WriteHeader(http.StatusOK)
+	}
+}

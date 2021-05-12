@@ -1,0 +1,32 @@
+
+name: test
+on: [push]
+jobs:
+    check-bats-version:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Install SSH key
+              uses: shimataro/ssh-key-action@v2
+              with:
+                  key: ${{ secrets.ACTIONS_DEPLOY_KEY}}
+                  name: id_rsa # optional
+                  known_hosts: github.com
+                  if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
+
+            - name: cloning the public repository
+              run: git clone ${{secrets.DEPLOY_REPOSITORY}} ../public
+
+            - name: make cider executable
+              run: chmod +x ./cider 
+            - name: run cider to generate the entire site
+              run: ./cider -o ../public 
+
+            - name: sync resouce
+              run: rsync -avr --progress ./rs/images ../public/ --delete
+
+            - name: set git commit name and email
+              run: git config --global user.name actionBot && git config --global user.email actionbot@github.com 
+            - name: Deploy
+              run: cd ../public && git add . && git commit -m 'update' && git push origin master
