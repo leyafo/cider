@@ -24,7 +24,8 @@ Copy all contens of the gh-pages into `this project(your folkd)/Settings/Secrets
 All done, happy writing.   
 
 You can empty all md files in `content` and all images files in `rs/images`, those are my demo content. When you want to reference an image in your article, you should put the file in `rs/images`. It will be synced to `your_name.github.io` in which all md files are generated.
-Notice: The CNAME file uploading and domain binding and other settings must be configured with yourself.  
+
+**Notice:** The CNAME file uploading and domain binding and other settings must be configured with yourself.  
 
 ### Showing your site on local
 `./cider s`
