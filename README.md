@@ -14,9 +14,9 @@ ssh-keygen -t rsa -b 4096 -C $(git config user.email) -f gh-pages -N ""
 ```
 It will create two files: `gh-pages` and `gh-pages.pub`.   
 Copy all contents of the `gh-pages.pub` into `Github/Setting/SSH and GPG keys/Add SSH Key.`  
-![ssh_public_key](rs/images/ssh_pub.png)
-Copy all contents of the `gh-pages` into `this project(your folkd)/Settings/Secrets/New repository secret`. The name must be **ACTIONS_DEPLOY_KEY**.
-![ssh_private_key](rs/images/ssh_private.jpg).
+![ssh_public_key](rs/images/ssh_pub.png)   
+Copy all contents of the `gh-pages` into `this project(your folkd)/Settings/Secrets/New repository secret`. The name must be **ACTIONS_DEPLOY_KEY**.  
+![ssh_private_key](rs/images/ssh_private.jpg)  
 3. Create a repository named `your_name.github.io`.    
 4. Copy the repository SSH url into `this project(your folkd)/Settings/Secrets/New repository secret`. The name must be **DEPLOY_REPOSITORY**.  
 ![ssh_repository_url](rs/images/repository_url.jpg)
