@@ -88,7 +88,7 @@ func (s *viewingServer) viewingServer(w http.ResponseWriter, r *http.Request)  {
 	p := strings.TrimSpace(r.URL.Path)
 	if p[len(p)-1] == '/'{
 		err = render.GenerateListWithPath(s.IndexTemplate, s.PostList, p, w)
-	}else if strings.Index(p, "/images") == 0{
+	}else if strings.Index(p, "/rs/images") == 0{
 		f, err := os.Open(cwdPath(p))
 		if err != nil{
 			w.WriteHeader(http.StatusNotFound)
